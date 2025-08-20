@@ -1,0 +1,8 @@
+# Ignore temporary files and logs
+*.tmp
+*.log
+.DS_Store
+
+# Don't ignore workflow files
+!*.yml
+!*.yaml

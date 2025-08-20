@@ -1,0 +1,94 @@
+name: Sync from Database Release Branch
+
+on:
+  # Run daily at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+  # Allow manual triggering
+  workflow_dispatch:
+  # Also trigger when Database repository dispatches updates
+  repository_dispatch:
+    types: [database-release-updated]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout DatabaseReleases
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      
+      - name: Add Database remote
+        run: |
+          git remote add database https://github.com/EhTagTranslation/Database.git || true
+          git remote set-url database https://github.com/EhTagTranslation/Database.git
+      
+      - name: Fetch Database release branch
+        run: |
+          git fetch database release
+      
+      - name: Check for updates
+        id: check_updates
+        run: |
+          # Get the current SHA from our repo
+          CURRENT_SHA=$(cat sha 2>/dev/null || echo "")
+          
+          # Get the latest SHA from Database release branch
+          LATEST_SHA=$(git rev-parse database/release)
+          
+          echo "Current SHA: $CURRENT_SHA"
+          echo "Latest SHA: $LATEST_SHA"
+          
+          if [ "$CURRENT_SHA" != "$LATEST_SHA" ]; then
+            echo "Updates available"
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+            echo "latest_sha=$LATEST_SHA" >> $GITHUB_OUTPUT
+          else
+            echo "No updates available"
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Sync files from Database release branch
+        if: steps.check_updates.outputs.has_updates == 'true'
+        run: |
+          # Remove all files except .git and .github
+          find . -maxdepth 1 -type f ! -name ".git*" -delete 2>/dev/null || true
+          
+          # Copy files from Database release branch
+          git checkout database/release -- . 2>/dev/null || true
+          
+          # Restore .github directory if it was overwritten
+          git checkout HEAD -- .github/ 2>/dev/null || true
+          
+          # Ensure the sha file contains the correct commit hash
+          echo "${{ steps.check_updates.outputs.latest_sha }}" > sha
+      
+      - name: Commit and push changes
+        if: steps.check_updates.outputs.has_updates == 'true'
+        run: |
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Sync from Database release branch - commit ${{ steps.check_updates.outputs.latest_sha }}"
+            git push origin HEAD
+            echo "✅ Successfully synced from Database release branch"
+          fi
+      
+      - name: Report sync status
+        run: |
+          if [ "${{ steps.check_updates.outputs.has_updates }}" == "true" ]; then
+            echo "::notice::Synced from Database release branch with SHA ${{ steps.check_updates.outputs.latest_sha }}"
+          else
+            echo "::notice::DatabaseReleases is already up to date"
+          fi
