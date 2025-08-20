@@ -1,9 +1,9 @@
 name: Sync from Database Release Branch
 
 on:
-  # Run daily at 2 AM UTC
+  # Run every 6 hours
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 */6 * * *'
   # Allow manual triggering
   workflow_dispatch:
   # Also trigger when Database repository dispatches updates
@@ -25,8 +25,8 @@ jobs:
       
       - name: Setup Git
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "ehtagtranslation[bot]"
+          git config user.email "66814738+ehtagtranslation[bot]@users.noreply.github.com"
       
       - name: Add Database remote
         run: |

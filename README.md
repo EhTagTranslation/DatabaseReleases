@@ -1,50 +1,50 @@
 # DatabaseReleases
 
-This repository contains the release builds of the EhTagTranslation database.
+此仓库包含 EhTagTranslation 数据库的发布版本。
 
-## Sync Process
+## 同步流程
 
-This repository is automatically synchronized with the `release` branch of [EhTagTranslation/Database](https://github.com/EhTagTranslation/Database) using GitHub Actions.
+此仓库通过 GitHub Actions 自动与 [EhTagTranslation/Database](https://github.com/EhTagTranslation/Database) 的 `release` 分支同步。
 
-### Automatic Sync
+### 自动同步
 
-The sync process runs:
-- **Daily at 2 AM UTC** via scheduled workflow
-- **On-demand** via manual workflow dispatch  
-- **When triggered** by the Database repository via repository_dispatch
+同步流程运行于：
+- **每 6 小时** 通过定时工作流
+- **按需** 通过手动工作流调度
+- **被触发时** 通过 Database 仓库的 repository_dispatch
 
-### How it Works
+### 工作原理
 
-1. **Change Detection**: Compares the SHA stored in the `sha` file with the latest commit on Database's release branch
-2. **File Sync**: If changes are detected, downloads all files from the Database release branch
-3. **Safe Update**: Preserves repository-specific files (`.github/`, `.gitignore`, `README.md`)
-4. **Commit**: Creates a new commit with reference to the source Database commit
+1. **变更检测**：比较存储在 `sha` 文件中的 SHA 与 Database release 分支上的最新提交
+2. **文件同步**：如果检测到变更，从 Database release 分支下载所有文件
+3. **安全更新**：保留仓库特定文件（`.github/`、`.gitignore`、`README.md`）
+4. **提交**：创建新提交并引用源 Database 提交
 
-### Manual Sync
+### 手动同步
 
-To manually trigger a sync:
+手动触发同步：
 
-1. Go to the [Actions tab](../../actions)
-2. Select "Sync from Database Release Branch" workflow  
-3. Click "Run workflow"
+1. 前往 [Actions 标签页](../../actions)
+2. 选择"Sync from Database Release Branch"工作流
+3. 点击"Run workflow"
 
-### Permissions
+### 权限
 
-The workflow uses `GITHUB_TOKEN` with `contents: write` permission to:
-- Fetch from the Database repository (public, no auth needed)
-- Commit and push changes to this repository
+工作流使用具有 `contents: write` 权限的 `GITHUB_TOKEN`：
+- 从 Database 仓库获取（公开，无需认证）
+- 提交并推送变更到此仓库
 
-### Files
+### 文件
 
-The repository contains the following database files:
-- `db.ast.js` / `db.ast.json` - AST format database
-- `db.full.js` / `db.full.json` - Full database with all fields  
-- `db.html.js` / `db.html.json` - HTML formatted database
-- `db.raw.js` / `db.raw.json` - Raw database format
-- `db.text.js` / `db.text.json` - Text-only database
-- `*.gz` files - Compressed versions of the JSON files
-- `sha` - Contains the commit hash from the source Database repository
+仓库包含以下数据库文件：
+- `db.ast.js` / `db.ast.json` - AST 格式数据库
+- `db.full.js` / `db.full.json` - 包含所有字段的完整数据库
+- `db.html.js` / `db.html.json` - HTML 格式数据库
+- `db.raw.js` / `db.raw.json` - 原始数据库格式
+- `db.text.js` / `db.text.json` - 纯文本数据库
+- `*.gz` 文件 - JSON 文件的压缩版本
+- `sha` - 包含来源 Database 仓库的提交哈希
 
-## Usage
+## 使用方法
 
-These files can be used directly in web applications or downloaded for offline use. See the [main Database repository](https://github.com/EhTagTranslation/Database) for documentation on the data format and usage instructions.
+这些文件可以直接用于 Web 应用程序或下载离线使用。有关数据格式和使用说明的文档，请参阅 [主 Database 仓库](https://github.com/EhTagTranslation/Database)。
